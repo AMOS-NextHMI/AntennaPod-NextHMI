@@ -1,0 +1,110 @@
+apply plugin: "com.android.library"
+
+android {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        multiDexEnabled false
+        versionCode 1
+        versionName "1.0"
+        testApplicationId "de.danoeh.antennapod.core.tests"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = [ eventBusIndex : 'de.danoeh.antennapod.core.ApCoreEventBusIndex' ]
+            }
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+        }
+        debug {
+            // debug build has method count over 64k single-dex threshold.
+            // For building debug build to use on Android < 21 (pre-Android 5) devices,
+            // you need to manually change class
+            // de.danoeh.antennapod.PodcastApp to extend MultiDexApplication .
+            // See Issue #2813
+            multiDexEnabled true
+        }
+    }
+
+    packagingOptions {
+        exclude "META-INF/LICENSE.txt"
+        exclude "META-INF/NOTICE.txt"
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    flavorDimensions "market"
+    productFlavors {
+        free {
+            dimension "market"
+        }
+        play {
+            dimension "market"
+        }
+    }
+
+}
+
+dependencies {
+    implementation "androidx.appcompat:appcompat:1.1.0"
+    implementation "androidx.preference:preference:1.1.0"
+    annotationProcessor "androidx.annotation:annotation:1.1.0"
+    implementation "android.arch.work:work-runtime:$workManagerVersion"
+    implementation "androidx.media:media:1.1.0"
+    implementation "org.apache.commons:commons-lang3:$commonslangVersion"
+    implementation "org.apache.commons:commons-text:$commonstextVersion"
+    implementation "commons-io:commons-io:$commonsioVersion"
+    implementation "com.jayway.android.robotium:robotium-solo:$robotiumSoloVersion"
+    implementation "org.jsoup:jsoup:$jsoupVersion"
+    implementation "com.github.bumptech.glide:glide:$glideVersion"
+    annotationProcessor "com.github.bumptech.glide:compiler:$glideVersion"
+    implementation "com.github.bumptech.glide:okhttp3-integration:$glideOkhttpIntegrationVersion@aar"
+    implementation "com.squareup.okhttp3:okhttp:$okhttpVersion"
+    implementation "com.squareup.okhttp3:okhttp-urlconnection:$okhttpVersion"
+    implementation "com.squareup.okio:okio:$okioVersion"
+    implementation "org.greenrobot:eventbus:$eventbusVersion"
+    annotationProcessor "org.greenrobot:eventbus-annotation-processor:$eventbusVersion"
+    implementation "io.reactivex.rxjava2:rxandroid:$rxAndroidVersion"
+    implementation "io.reactivex.rxjava2:rxjava:$rxJavaVersion"
+
+    implementation "com.google.android.exoplayer:exoplayer:$exoPlayerVersion"
+    implementation "com.github.AntennaPod:AntennaPod-AudioPlayer:$audioPlayerVersion"
+
+    // Add casting features
+    // free build hack: skip some dependencies
+    if (!doFreeBuild()) {
+        playApi "com.google.android.libraries.cast.companionlibrary:ccl:$castCompanionLibVer"
+        api "androidx.mediarouter:mediarouter:1.0.0"
+        playApi "com.google.android.gms:play-services-cast:$playServicesVersion"
+        api "com.google.android.support:wearable:$wearableSupportVersion"
+    } else {
+        System.out.println("core: free build hack, skipping some dependencies")
+    }
+
+    testImplementation "org.awaitility:awaitility:$awaitilityVersion"
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.mockito:mockito-core:1.10.19'
+    androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
+    androidTestImplementation 'androidx.test:runner:1.2.0'
+    androidTestImplementation 'androidx.test:rules:1.2.0'
+
+}
+
+tasks.withType(Test) {
+    testLogging {
+        exceptionFormat "full"
+        events "skipped", "passed", "failed"
+        showStandardStreams true
+        displayGranularity 2
+    }
+}
