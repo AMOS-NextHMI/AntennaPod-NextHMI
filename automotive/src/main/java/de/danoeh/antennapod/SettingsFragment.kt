@@ -18,11 +18,16 @@ package de.danoeh.antennapod
 
 import android.app.Application
 import android.content.ComponentName
+import android.content.Intent
 import android.os.Bundle
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModelProviders
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import androidx.core.content.ContextCompat.startActivity
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+
+
 
 
 /**
@@ -31,7 +36,23 @@ import androidx.preference.PreferenceFragmentCompat
 class SettingsFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.preferences, rootKey)
+
     }
+    override fun onPreferenceTreeClick(preference: Preference?): Boolean {
+        return when (preference?.key) {
+            "newAbo" -> {
+                val myIntent = Intent(this, )
+                myIntent.putExtra("key", value) //Optional parameters
+                this.startActivity(myIntent)
+                requireActivity().finish()
+                true
+            }
+            else -> {
+                super.onPreferenceTreeClick(preference)
+            }
+        }
+    }
+
 
 
 }

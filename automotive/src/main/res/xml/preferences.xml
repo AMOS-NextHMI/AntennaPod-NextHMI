@@ -22,13 +22,10 @@
         android:layout="@layout/preference_category">
 
         <Preference
+            android:clickable="true"
             android:key="newAbo"
-            android:title="neue Podcasts abonnieren"
-            android:layout="@layout/preference"/>
-        <Preference
-            android:key="newAbo"
-            android:title="Abonnements verwalten"
-            android:layout="@layout/preference"/>
+            android:layout="@layout/preference"
+            android:title="neue Podcasts abonnieren" />
 
     </PreferenceCategory>
 
