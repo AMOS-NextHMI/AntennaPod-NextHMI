@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">Antennapod</string>
+    <string name="app_name">AntennapodHMI</string>
     <string name="settings_label">Antennapod Settings</string>
 </resources>
