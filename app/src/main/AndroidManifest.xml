@@ -328,6 +328,10 @@
                 android:value="de.danoeh.antennapod.activity.PreferenceActivity"/>
         </activity>
 
+
+        <!-- Car compatible theme must use minSDK24 -->
+
+
         <receiver android:name=".receiver.ConnectivityActionReceiver">
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>

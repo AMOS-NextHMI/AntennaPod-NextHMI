@@ -339,4 +339,14 @@
         <item name="android:progressDrawable">@drawable/progress_bar_horizontal_trueblack</item>
     </style>
 
+    <style name="Theme.Car.Dark.NoActionBar.Drawer" parent="Theme.Car.NoActionBar.Drawer"/>
+
+    <style name="AppTheme.Drawer" parent="Theme.Car.Dark.NoActionBar.Drawer">
+        <item name="carToolbarStyle">@style/AppToolbar</item>
+    </style>
+
+    <style name="AppToolbar" parent="Widget.Car.CarToolbar">
+        <item name="android:background">@color/colorPrimary</item>
+    </style>
+
 </resources>
