@@ -1,6 +1,5 @@
 package de.danoeh.antennapod.core.service.playback;
 
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -363,7 +362,7 @@ public class PlaybackService extends MediaBrowserServiceCompat {
                 null); // Bundle of optional extras
     }
 
-    private MediaBrowserCompat.MediaItem createBrowsableMediaItemForRoot() {
+    private MediaBrowserCompat.MediaItem createBrowsableMediaQueueItemForRoot() {
         MediaDescriptionCompat description = new MediaDescriptionCompat.Builder()
                 .setMediaId(getResources().getString(R.string.queue_label))
                 .setTitle(getResources().getString(R.string.queue_label))
@@ -371,6 +370,44 @@ public class PlaybackService extends MediaBrowserServiceCompat {
         return new MediaBrowserCompat.MediaItem(description,
                 MediaBrowserCompat.MediaItem.FLAG_BROWSABLE);
     }
+
+    private MediaBrowserCompat.MediaItem createBrowsableMediaNewItemForRoot() {
+        MediaDescriptionCompat description = new MediaDescriptionCompat.Builder()
+                .setMediaId(getResources().getString(R.string.new_label))
+                .setTitle(getResources().getString(R.string.new_label))
+                .build();
+        return new MediaBrowserCompat.MediaItem(description,
+                MediaBrowserCompat.MediaItem.FLAG_BROWSABLE);
+    }
+
+    private MediaBrowserCompat.MediaItem createBrowsableMediaAllItemForRoot() {
+        MediaDescriptionCompat description = new MediaDescriptionCompat.Builder()
+                .setMediaId(getResources().getString(R.string.all_label))
+                .setTitle(getResources().getString(R.string.all_label))
+                .build();
+        return new MediaBrowserCompat.MediaItem(description,
+                MediaBrowserCompat.MediaItem.FLAG_BROWSABLE);
+    }
+
+    private MediaBrowserCompat.MediaItem createBrowsableMediaFavoriteItemForRoot() {
+        MediaDescriptionCompat description = new MediaDescriptionCompat.Builder()
+                .setMediaId(getResources().getString(R.string.favorite_episodes_label))
+                .setTitle(getResources().getString(R.string.favorite_episodes_label))
+                .build();
+        return new MediaBrowserCompat.MediaItem(description,
+                MediaBrowserCompat.MediaItem.FLAG_BROWSABLE);
+    }
+
+    private MediaBrowserCompat.MediaItem createBrowsableMediaSubscriptionItemForRoot() {
+        MediaDescriptionCompat description = new MediaDescriptionCompat.Builder()
+                .setMediaId(getResources().getString(R.string.subscriptions_label))
+                .setTitle(getResources().getString(R.string.subscriptions_label))
+                .build();
+        return new MediaBrowserCompat.MediaItem(description,
+                MediaBrowserCompat.MediaItem.FLAG_BROWSABLE);
+    }
+
+
 
     private MediaBrowserCompat.MediaItem createBrowsableMediaItemForFeed(Feed feed) {
         MediaDescriptionCompat.Builder builder = new MediaDescriptionCompat.Builder()
@@ -398,15 +435,23 @@ public class PlaybackService extends MediaBrowserServiceCompat {
             // Root List
             try {
                 if (!(taskManager.getQueue().isEmpty())) {
-                    mediaItems.add(createBrowsableMediaItemForRoot());
+                    mediaItems.add(createBrowsableMediaQueueItemForRoot());
                 }
+
+                mediaItems.add(createBrowsableMediaNewItemForRoot());
+                mediaItems.add(createBrowsableMediaAllItemForRoot());
+                if (!(DBReader.getFavoriteItemsList().isEmpty())) {
+                    mediaItems.add(createBrowsableMediaFavoriteItemForRoot());
+                }
+                //mediaItems.add(createBrowsableMediaSubscriptionItemForRoot());
+
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            List<Feed> feeds = DBReader.getFeedList();
+            /*List<Feed> feeds = DBReader.getFeedList();
             for (Feed feed : feeds) {
                 mediaItems.add(createBrowsableMediaItemForFeed(feed));
-            }
+            }*/
         } else if (parentId.equals(getResources().getString(R.string.queue_label))) {
             // Child List
             try {
@@ -419,7 +464,46 @@ public class PlaybackService extends MediaBrowserServiceCompat {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        } else if (parentId.startsWith("FeedId:")) {
+        } else if (parentId.equals(getResources().getString(R.string.new_label))) {
+            try {
+                for (FeedItem feedItem : DBReader.getNewItemsList()){
+                    FeedMedia media = feedItem.getMedia();
+                    if (media != null){
+                        mediaItems.add(media.getMediaItem());
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        } else if (parentId.equals(getResources().getString(R.string.all_label))) {
+            try {
+                for (FeedItem feedItem : DBReader.getRecentlyPublishedEpisodes(0, 50)){
+                    FeedMedia media = feedItem.getMedia();
+                    if (media != null){
+                        mediaItems.add(media.getMediaItem());
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        } else if (parentId.equals(getResources().getString(R.string.favorite_episodes_label))){
+            try {
+                for (FeedItem feedItem : DBReader.getFavoriteItemsList()){
+                    FeedMedia media = feedItem.getMedia();
+                    if (media != null){
+                        mediaItems.add(media.getMediaItem());
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        } else if (parentId.equals(getResources().getString(R.string.subscriptions_label))){
+
+
+        } /*else if (parentId.startsWith("FeedId:")) {
             Long feedId = Long.parseLong(parentId.split(":")[1]);
             List<FeedItem> feedItems = DBReader.getFeedItemList(DBReader.getFeed(feedId));
             for (FeedItem feedItem : feedItems) {
@@ -427,7 +511,7 @@ public class PlaybackService extends MediaBrowserServiceCompat {
                     mediaItems.add(feedItem.getMedia().getMediaItem());
                 }
             }
-        }
+        }*/
         result.sendResult(mediaItems);
     }
 
@@ -1046,16 +1130,16 @@ public class PlaybackService extends MediaBrowserServiceCompat {
             switch (playerStatus) {
                 case PLAYING:
                     state = PlaybackStateCompat.STATE_PLAYING;
-                    break;
+                        break;
+                    case STOPPED:
+                        state = PlaybackStateCompat.STATE_STOPPED;
+                        break;
+                    case SEEKING:
+                        state = PlaybackStateCompat.STATE_FAST_FORWARDING;
+                        break;
                 case PREPARED:
                 case PAUSED:
                     state = PlaybackStateCompat.STATE_PAUSED;
-                    break;
-                case STOPPED:
-                    state = PlaybackStateCompat.STATE_STOPPED;
-                    break;
-                case SEEKING:
-                    state = PlaybackStateCompat.STATE_FAST_FORWARDING;
                     break;
                 case PREPARING:
                 case INITIALIZING:
