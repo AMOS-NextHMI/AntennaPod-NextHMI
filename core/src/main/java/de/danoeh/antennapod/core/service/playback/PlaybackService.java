@@ -6,10 +6,12 @@ import android.app.Service;
 import android.bluetooth.BluetoothA2dp;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -234,6 +236,18 @@ public class PlaybackService extends MediaBrowserServiceCompat {
     }
 
     /**
+     * Helper Method to generate a Uri to a file from the Resource folder.
+     *
+     */
+    private static Uri getUriForResource(Context context, int id) {
+        Resources res = context.getResources();
+        return Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE
+                + "://" + res.getResourcePackageName(id)
+                + "/" + res.getResourceTypeName(id)
+                + "/" + res.getResourceEntryName(id));
+    }
+
+    /**
      * Returns an intent which starts an audio- or videoplayer, depending on the
      * type of media that is being played. If the playbackservice is not
      * running, the type of the last played media will be looked up.
@@ -366,6 +380,7 @@ public class PlaybackService extends MediaBrowserServiceCompat {
         MediaDescriptionCompat description = new MediaDescriptionCompat.Builder()
                 .setMediaId(getResources().getString(R.string.queue_label))
                 .setTitle(getResources().getString(R.string.queue_label))
+                .setIconUri(getUriForResource(this, R.drawable.ic_list_white_24dp))
                 .build();
         return new MediaBrowserCompat.MediaItem(description,
                 MediaBrowserCompat.MediaItem.FLAG_BROWSABLE);
@@ -375,6 +390,7 @@ public class PlaybackService extends MediaBrowserServiceCompat {
         MediaDescriptionCompat description = new MediaDescriptionCompat.Builder()
                 .setMediaId(getResources().getString(R.string.new_label))
                 .setTitle(getResources().getString(R.string.new_label))
+                .setIconUri(getUriForResource(this, R.drawable.ic_new_releases_white_24dp))
                 .build();
         return new MediaBrowserCompat.MediaItem(description,
                 MediaBrowserCompat.MediaItem.FLAG_BROWSABLE);
@@ -384,6 +400,7 @@ public class PlaybackService extends MediaBrowserServiceCompat {
         MediaDescriptionCompat description = new MediaDescriptionCompat.Builder()
                 .setMediaId(getResources().getString(R.string.all_label))
                 .setTitle(getResources().getString(R.string.all_label))
+                .setIconUri(getUriForResource(this, R.drawable.ic_bookmark_white_24dp))
                 .build();
         return new MediaBrowserCompat.MediaItem(description,
                 MediaBrowserCompat.MediaItem.FLAG_BROWSABLE);
@@ -393,6 +410,7 @@ public class PlaybackService extends MediaBrowserServiceCompat {
         MediaDescriptionCompat description = new MediaDescriptionCompat.Builder()
                 .setMediaId(getResources().getString(R.string.favorite_episodes_label))
                 .setTitle(getResources().getString(R.string.favorite_episodes_label))
+                .setIconUri(getUriForResource(this, R.drawable.ic_star_white_24dp))
                 .build();
         return new MediaBrowserCompat.MediaItem(description,
                 MediaBrowserCompat.MediaItem.FLAG_BROWSABLE);
@@ -402,6 +420,7 @@ public class PlaybackService extends MediaBrowserServiceCompat {
         MediaDescriptionCompat description = new MediaDescriptionCompat.Builder()
                 .setMediaId(getResources().getString(R.string.subscriptions_label))
                 .setTitle(getResources().getString(R.string.subscriptions_label))
+                .setIconUri(getUriForResource(this, R.drawable.ic_folder_white_24dp))
                 .build();
         return new MediaBrowserCompat.MediaItem(description,
                 MediaBrowserCompat.MediaItem.FLAG_BROWSABLE);
@@ -443,15 +462,12 @@ public class PlaybackService extends MediaBrowserServiceCompat {
                 if (!(DBReader.getFavoriteItemsList().isEmpty())) {
                     mediaItems.add(createBrowsableMediaFavoriteItemForRoot());
                 }
-                //mediaItems.add(createBrowsableMediaSubscriptionItemForRoot());
+                mediaItems.add(createBrowsableMediaSubscriptionItemForRoot());
 
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            /*List<Feed> feeds = DBReader.getFeedList();
-            for (Feed feed : feeds) {
-                mediaItems.add(createBrowsableMediaItemForFeed(feed));
-            }*/
+
         } else if (parentId.equals(getResources().getString(R.string.queue_label))) {
             // Child List
             try {
@@ -501,9 +517,13 @@ public class PlaybackService extends MediaBrowserServiceCompat {
             }
 
         } else if (parentId.equals(getResources().getString(R.string.subscriptions_label))){
+            List<Feed> feeds = DBReader.getFeedList();
+            for (Feed feed : feeds) {
+                mediaItems.add(createBrowsableMediaItemForFeed(feed));
+            }
 
 
-        } /*else if (parentId.startsWith("FeedId:")) {
+        } else if (parentId.startsWith("FeedId:")) {
             Long feedId = Long.parseLong(parentId.split(":")[1]);
             List<FeedItem> feedItems = DBReader.getFeedItemList(DBReader.getFeed(feedId));
             for (FeedItem feedItem : feedItems) {
@@ -511,7 +531,7 @@ public class PlaybackService extends MediaBrowserServiceCompat {
                     mediaItems.add(feedItem.getMedia().getMediaItem());
                 }
             }
-        }*/
+        }
         result.sendResult(mediaItems);
     }
 
