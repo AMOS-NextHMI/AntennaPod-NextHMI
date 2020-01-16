@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.media.MediaMetadataRetriever;
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import androidx.annotation.Nullable;
@@ -167,6 +168,7 @@ public class FeedMedia extends FeedFile implements Playable {
                 .setTitle(p.getEpisodeTitle())
                 .setDescription(p.getFeedTitle())
                 .setSubtitle(p.getFeedTitle())
+                .setIconUri(Uri.parse(p.getImageLocation()))
                 .build();
         return new MediaBrowserCompat.MediaItem(description, MediaBrowserCompat.MediaItem.FLAG_PLAYABLE);
     }
