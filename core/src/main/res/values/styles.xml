@@ -83,6 +83,9 @@
         <item name="about_screen_card_background">#ffffff</item>
         <item name="about_screen_card_border">#d2d2d2</item>
         <item name="about_screen_font_color">#000000</item>
+
+        <item name="android:windowShowWallpaper">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
     </style>
 
     <style name="Theme.AntennaPod.Dark" parent="Theme.Base.AntennaPod.Dark">
@@ -168,6 +171,9 @@
         <item name="about_screen_card_background">#424242</item>
         <item name="about_screen_card_border">#262626</item>
         <item name="about_screen_font_color">#ffffff</item>
+
+        <item name="android:windowShowWallpaper">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
     </style>
 
     <style name="Theme.AntennaPod.TrueBlack" parent="Theme.Base.AntennaPod.TrueBlack">

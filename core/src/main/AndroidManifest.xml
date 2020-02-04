@@ -19,7 +19,7 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher">
 
-
+<!--
         <activity
             android:name=".automotive.SettingsActivity"
             android:theme="@style/AppTheme.Drawer"
@@ -28,7 +28,7 @@
                 <action android:name="android.intent.action.APPLICATION_PREFERENCES" />
             </intent-filter>
         </activity>
-
+-->
 
         <service
             android:name=".service.download.DownloadService"
